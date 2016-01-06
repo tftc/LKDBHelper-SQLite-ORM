@@ -39,6 +39,9 @@
         return NO;                                                                                 \
     }
 
+
+static NSString *__default_db_name__ = @"LKDB";
+
 @interface NSObject (LKTabelStructure_Private)
 - (void)setDb_inserting:(BOOL)db_inserting;
 @end
@@ -62,6 +65,12 @@
 @synthesize encryptionKey = _encryptionKey;
 
 static BOOL LKDBLogErrorEnable = NO;
+
++ (void)registerDBName:(NSString *)dbName
+{
+    __default_db_name__ = dbName;
+}
+
 +(void)setLogError:(BOOL)logError
 {
     if (LKDBLogErrorEnable == logError) {
@@ -122,7 +131,7 @@ static BOOL LKDBLogErrorEnable = NO;
 
 - (instancetype)init
 {
-    return [self initWithDBName:@"LKDB"];
+    return [self initWithDBName:__default_db_name__];
 }
 
 - (instancetype)initWithDBName:(NSString*)dbname
