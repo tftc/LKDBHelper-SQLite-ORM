@@ -210,6 +210,41 @@
     if (completedBlock) {
         completedBlock(allInserted);
     }
+    
 }
-
+//新加入方法start
++(NSMutableArray *)searchRawSqliteDataWithFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock
+{
+    NSString *tableName=[self performSelector:@selector(getTableName)];
+    NSString *sql = [NSString stringWithFormat:@"select * from %@",tableName];
+    return [self searchRawSqliteDataWithSql:sql withFinishedBlock:finishedBlock andErrorBlock:errorBlock];
+}
++(NSMutableArray *)searchRawSqliteDataWithSql:(NSString *)sql withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock
+{
+    LKDBHelper *dbHelper=[self getUsingLKDBHelper];
+   __block NSMutableArray *resultArray = [NSMutableArray array];
+    if (!sql || [sql length]==0) {
+        NSString *tableName=[self performSelector:@selector(getTableName)];
+        sql =[NSString stringWithFormat:@"select * from %@",tableName];
+    }
+    __block NSMutableArray* results = nil;
+    [dbHelper executeDB:^(FMDatabase* db) {
+        FMResultSet* set = [db executeQuery:sql];
+        while ([set next]) {
+            NSMutableDictionary *resultDict=[NSMutableDictionary dictionary];
+            for (int index=0; index<set.columnCount; index++) {
+                resultDict[[set columnNameForIndex:index]]=[set stringForColumnIndex:index];
+            }
+            [resultArray addObject:resultDict];
+            
+        }
+//        NSLog(@"resultArray=%@",resultArray);
+        if (finishedBlock) {
+            finishedBlock(resultArray);
+        }
+        [set close];
+    }];
+    return results;
+}
+//新加入方法end
 @end
