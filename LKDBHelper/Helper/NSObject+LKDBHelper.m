@@ -213,13 +213,35 @@
     
 }
 //新加入方法start
-+(NSMutableArray *)searchRawSqliteDataWithFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock
++(NSMutableArray *)searchRawSqliteWithOriginalClass:(Class )originalClass withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock
 {
     NSString *tableName=[self performSelector:@selector(getTableName)];
     NSString *sql = [NSString stringWithFormat:@"select * from %@",tableName];
-    return [self searchRawSqliteDataWithSql:sql withFinishedBlock:finishedBlock andErrorBlock:errorBlock];
+    
+    NSString *originalDataTableName=[originalClass performSelector:@selector(getTableName)];
+    NSString *originalDataSql = [NSString stringWithFormat:@"select * from %@",originalDataTableName];
+    [self searchRawSqliteDataWithOriginalDataSql:originalDataSql sql:sql withFinishedBlock:^(id  _Nullable data) {
+        if (finishedBlock) {
+            finishedBlock(data);
+        }
+    } andErrorBlock:^(NSError * _Nullable error) {
+        if (errorBlock) {
+            errorBlock(error);
+        }
+    }];
+//    [self searchRawSqliteDataWithSql:sql withFinishedBlock:^(id  _Nullable data) {
+//        if (finishedBlock) {
+//            finishedBlock(data);
+//        }
+//    } andErrorBlock:^(NSError * _Nullable error) {
+//        if (errorBlock) {
+//            errorBlock(error);
+//        }
+//    }];
+//   [self searchRawSqliteDataWithSql:sql withFinishedBlock:finishedBlock andErrorBlock:errorBlock];
+    return nil;
 }
-+(NSMutableArray *)searchRawSqliteDataWithSql:(NSString *)sql withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock
++(NSMutableArray *)searchRawSqliteDataWithOriginalDataSql:(NSString *)originalDataSql sql:(NSString *)sql withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock
 {
     LKDBHelper *dbHelper=[self getUsingLKDBHelper];
    __block NSMutableArray *resultArray = [NSMutableArray array];
@@ -227,7 +249,9 @@
         NSString *tableName=[self performSelector:@selector(getTableName)];
         sql =[NSString stringWithFormat:@"select * from %@",tableName];
     }
+
     __block NSMutableArray* results = nil;
+
     [dbHelper executeDB:^(FMDatabase* db) {
         FMResultSet* set = [db executeQuery:sql];
         while ([set next]) {
@@ -238,9 +262,20 @@
             [resultArray addObject:resultDict];
             
         }
-//        NSLog(@"resultArray=%@",resultArray);
+        NSMutableArray *originalDataArray = [NSMutableArray array];
+        NSMutableDictionary *originalDataDict =[NSMutableDictionary dictionary];
+        FMResultSet* originalDataSet = [db executeQuery:originalDataSql];
+        while ([originalDataSet next]) {
+
+            for (int index=0; index<originalDataSet.columnCount; index++) {
+                originalDataDict[[originalDataSet columnNameForIndex:index]]=[originalDataSet stringForColumnIndex:index];
+            }
+            
+        }
+        originalDataDict[@"users"] = resultArray;
+        NSLog(@"originalDataDict=%@",originalDataDict);
         if (finishedBlock) {
-            finishedBlock(resultArray);
+            finishedBlock(originalDataDict);
         }
         [set close];
     }];

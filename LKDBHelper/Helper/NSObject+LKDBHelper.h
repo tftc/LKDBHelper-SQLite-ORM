@@ -83,7 +83,7 @@
 + (void)insertToDBWithArray:(NSArray*)models filter:(void (^)(id model, BOOL inserted, BOOL* rollback))filter;
 + (void)insertToDBWithArray:(NSArray*)models filter:(void (^)(id model, BOOL inserted, BOOL* rollback))filter completed:(void (^)(BOOL allInserted))completedBlock;
 //新加入方法start
-+(NSMutableArray *)searchRawSqliteDataWithFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock;
-+(NSMutableArray *)searchRawSqliteDataWithSql:(NSString *)sql withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock;
++(NSMutableArray *)searchRawSqliteWithOriginalClass:(Class )originalClass withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock;
++(NSMutableArray *)searchRawSqliteDataWithOriginalDataSql:(NSString *)originalDataSql sql:(NSString *)sql withFinishedBlock:(void(^ _Nullable)(id _Nullable data))finishedBlock andErrorBlock:(void(^ _Nullable)(NSError * _Nullable error))errorBlock;
 //新加入方法end
 @end
