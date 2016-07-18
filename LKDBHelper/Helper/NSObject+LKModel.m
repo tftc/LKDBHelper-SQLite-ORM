@@ -24,17 +24,25 @@ static char LKModelBase_Key_TableName;
 static char LKModelBase_Key_Inserting;
 
 @implementation NSObject (LKModel)
-
+static LKDBHelper* _helper;
 + (LKDBHelper*)getUsingLKDBHelper
 {
     ///ios8 能获取系统类的属性了  所以没有办法判断属性数量来区分自定义类和系统类
     ///可能系统类的存取会不正确
-    static LKDBHelper* helper;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        helper = [[LKDBHelper alloc] init];
-    });
-    return helper;
+//    static LKDBHelper* helper;
+//    static dispatch_once_t onceToken;
+//    dispatch_once(&onceToken, ^{
+//        helper = [[LKDBHelper alloc] init];
+//    });
+    if (_helper==nil) {
+        _helper = [[LKDBHelper alloc]init];
+    }
+    
+    return _helper;
+}
++(void)resetLKDBHelper
+{
+    _helper = nil;
 }
 #pragma mark Tabel Structure Function 表结构
 + (NSString*)getTableName

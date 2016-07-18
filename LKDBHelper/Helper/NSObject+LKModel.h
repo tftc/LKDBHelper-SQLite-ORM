@@ -110,7 +110,7 @@
  *  @return LKDBHelper
  */
 + (LKDBHelper*)getUsingLKDBHelper;
-
++(void)resetLKDBHelper;
 /**
  *  class attributes
  *
